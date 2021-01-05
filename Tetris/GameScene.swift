@@ -11,8 +11,8 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+//    private var label : SKLabelNode?
+//    private var spinnyNode : SKShapeNode?
     
     override func didMove(to view: SKView) {
         
@@ -39,37 +39,48 @@ class GameScene: SKScene {
         
     }
     
-//    func createRandomTetrisShape() -> 
+    func createRandomTetrisShape() -> Tetromino {
+        let randomShapeType = TetrominoType.allCases.randomElement()!
+        let randomTetronimo = Tetromino(type: randomShapeType)
+        return randomTetronimo
+    }
     
     
     func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
+//        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+//            n.position = pos
+//            n.strokeColor = SKColor.green
+//            self.addChild(n)
+//        }
+        
+        let randomTetronimo = createRandomTetrisShape()
+        randomTetronimo.addToScene(self)
+        
+        randomTetronimo.runAction(SKAction.sequence([SKAction.wait(forDuration: 0.5),
+                                  SKAction.fadeOut(withDuration: 0.5),
+                                  SKAction.removeFromParent()]))
     }
     
     func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
+//        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+//            n.position = pos
+//            n.strokeColor = SKColor.blue
+//            self.addChild(n)
+//        }
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+//        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+//            n.position = pos
+//            n.strokeColor = SKColor.red
+//            self.addChild(n)
+//        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
+//        if let label = self.label {
+//            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
+//        }
         
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }

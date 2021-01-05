@@ -9,21 +9,26 @@
 import SpriteKit
 
 
-enum TetrominoType {
+enum TetrominoType: CaseIterable {
     case Straight, Square, L, J, T, S, Z
 }
 
 class Tetromino {
     var blocks: [SKShapeNode]
-    let defBlockSize = CGSize(width: 10.0, height: 10.0)
+    let defBlockSize = CGSize(width: 100.0, height: 100.0)
     let defBlockCornerRadius: CGFloat = 5.0
+    
+    let defFillColor = SKColor.blue
+    let defStrokeColor = SKColor.red
     
     init(type: TetrominoType) {
         blocks = [SKShapeNode]()
         
         for _ in 0...4 {
             blocks.append(createBlock(size: defBlockSize,
-                                      cornerRadius: defBlockCornerRadius))
+                                      cornerRadius: defBlockCornerRadius,
+                                      fillColor: defFillColor,
+                                      strokeColor: defStrokeColor))
         }
         
         switch type {
@@ -44,8 +49,14 @@ class Tetromino {
         }
     }
     
-    func createBlock(size: CGSize, cornerRadius: CGFloat) -> SKShapeNode {
-        return SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+    func createBlock(size: CGSize,
+                     cornerRadius: CGFloat,
+                     fillColor: SKColor,
+                     strokeColor: SKColor) -> SKShapeNode {
+        let block = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
+        block.fillColor = fillColor
+        block.strokeColor = strokeColor
+        return block
     }
     
     func setBlockPosition(block: SKShapeNode, x: CGFloat, y: CGFloat) {
@@ -78,15 +89,24 @@ class Tetromino {
     }
     
     func arrangeL() {
-        
+        arrageStraight()
+        let firstBlockPos = blocks.first!.position
+        blocks.first?.position = CGPoint(x: firstBlockPos.x + defBlockSize.width,
+                                         y: firstBlockPos.y + defBlockSize.height)
     }
     
     func arrangeJ() {
-        
+        arrageStraight()
+        let lastBlockPos = blocks.last!.position
+        blocks.last?.position = CGPoint(x: lastBlockPos.x - defBlockSize.width,
+                                        y: lastBlockPos.y + defBlockSize.height)
     }
     
     func arrangeT() {
-        
+        arrageStraight()
+        let firstBlockPos = blocks.first!.position
+        blocks.first?.position = CGPoint(x: firstBlockPos.x + (defBlockSize.width * 2),
+                                         y: firstBlockPos.y + defBlockSize.height)
     }
     
     func arrangeS() {
@@ -119,5 +139,9 @@ class Tetromino {
     
     func rotateCounterClockwise() {
         
+    }
+    
+    func runAction(_ action: SKAction) {
+        blocks.forEach({ $0.run(action) })
     }
 }
