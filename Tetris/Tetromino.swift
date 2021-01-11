@@ -15,11 +15,21 @@ enum TetrominoType: CaseIterable {
 
 class Tetromino {
     var blocks: [SKShapeNode]
-    let defBlockSize = CGSize(width: 100.0, height: 100.0)
+    let defBlockSize = CGSize(width: 50.0, height: 50.0)
     let defBlockCornerRadius: CGFloat = 5.0
     
     let defFillColor = SKColor.blue
     let defStrokeColor = SKColor.red
+    
+    var position: CGPoint {
+        get {
+            blocks[3].position
+        }
+        set {
+            // TODO: Set position of third block, and all other blocks
+            //       relative to it.
+        }
+    }
     
     init(type: TetrominoType) {
         blocks = [SKShapeNode]()
@@ -110,11 +120,21 @@ class Tetromino {
     }
     
     func arrangeS() {
-        
+        arrangeSquare()
+        let bottom2 = blocks[2...3]
+        bottom2.forEach { block in
+            let ogPos = block.position
+            block.position = CGPoint(x: ogPos.x - defBlockSize.width, y: ogPos.y)
+        }
     }
     
     func arrangeZ() {
-        
+        arrangeSquare()
+        let bottom2 = blocks[2...3]
+        bottom2.forEach { block in
+            let ogPos = block.position
+            block.position = CGPoint(x: ogPos.x + defBlockSize.width, y: ogPos.y)
+        }
     }
     
     func addToScene(_ scene: SKScene) {
