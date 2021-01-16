@@ -48,10 +48,10 @@ class GameScene: SKScene {
     
     func touchDown(atPoint pos : CGPoint) {
         let randomTetronimo = createRandomTetrisShape()
+        randomTetronimo.position = pos
         randomTetronimo.addToScene(self)
-        
         randomTetronimo.runAction(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                  SKAction.fadeOut(withDuration: 0.5),
+                                                     SKAction.fadeOut(withDuration: 1.0),
                                   SKAction.removeFromParent()]))
     }
     

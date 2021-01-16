@@ -14,6 +14,7 @@ enum TetrominoType: CaseIterable {
 }
 
 class Tetromino {
+    var parentNode: SKNode
     var blocks: [SKShapeNode]
     let defBlockSize = CGSize(width: 50.0, height: 50.0)
     let defBlockCornerRadius: CGFloat = 5.0
@@ -23,15 +24,15 @@ class Tetromino {
     
     var position: CGPoint {
         get {
-            blocks[3].position
+            parentNode.position
         }
         set {
-            // TODO: Set position of third block, and all other blocks
-            //       relative to it.
+            parentNode.position = newValue
         }
     }
     
     init(type: TetrominoType) {
+        parentNode = SKNode()
         blocks = [SKShapeNode]()
         
         for _ in 0...4 {
@@ -39,6 +40,10 @@ class Tetromino {
                                       cornerRadius: defBlockCornerRadius,
                                       fillColor: defFillColor,
                                       strokeColor: defStrokeColor))
+        }
+        
+        blocks.forEach { block in
+            parentNode.addChild(block)
         }
         
         switch type {
@@ -138,19 +143,17 @@ class Tetromino {
     }
     
     func addToScene(_ scene: SKScene) {
-        blocks.forEach({ scene.addChild($0) })
+        scene.addChild(parentNode)
     }
     
     func removeFromScene() {
-        blocks.forEach({ $0.removeFromParent() })
+        parentNode.removeFromParent()
     }
     
     
     // Add animations for these?
     func stepDown() {
-        blocks.forEach { block in
-            block.position.y += defBlockSize.height
-        }
+        parentNode.position.y += defBlockSize.height
     }
     
     func rotateClockwise() {
@@ -162,6 +165,6 @@ class Tetromino {
     }
     
     func runAction(_ action: SKAction) {
-        blocks.forEach({ $0.run(action) })
+        parentNode.run(action)
     }
 }
