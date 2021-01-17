@@ -18,6 +18,7 @@
 		CE3BB4B825A2A45B003F2812 /* TetrisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4B725A2A45B003F2812 /* TetrisTests.swift */; };
 		CE3BB4C325A2A45B003F2812 /* TetrisUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4C225A2A45B003F2812 /* TetrisUITests.swift */; };
 		CE3BB4D125A2A65D003F2812 /* Tetromino.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4D025A2A65D003F2812 /* Tetromino.swift */; };
+		CE3BB4D325B452DE003F2812 /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		CE3BB4C225A2A45B003F2812 /* TetrisUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TetrisUITests.swift; sourceTree = "<group>"; };
 		CE3BB4C425A2A45B003F2812 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CE3BB4D025A2A65D003F2812 /* Tetromino.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tetromino.swift; sourceTree = "<group>"; };
+		CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 				CE3BB4AB25A2A45A003F2812 /* LaunchScreen.storyboard */,
 				CE3BB4AE25A2A45A003F2812 /* Info.plist */,
 				CE3BB4D025A2A65D003F2812 /* Tetromino.swift */,
+				CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */,
 			);
 			path = Tetris;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 			files = (
 				CE3BB4D125A2A65D003F2812 /* Tetromino.swift in Sources */,
 				CE3BB4A325A2A458003F2812 /* GameScene.swift in Sources */,
+				CE3BB4D325B452DE003F2812 /* CGPointExtension.swift in Sources */,
 				CE3BB4A525A2A458003F2812 /* GameViewController.swift in Sources */,
 				CE3BB49D25A2A458003F2812 /* AppDelegate.swift in Sources */,
 			);

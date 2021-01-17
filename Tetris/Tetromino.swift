@@ -35,7 +35,7 @@ class Tetromino {
         parentNode = SKNode()
         blocks = [SKShapeNode]()
         
-        for _ in 0...4 {
+        for _ in 0...3 {
             blocks.append(createBlock(size: defBlockSize,
                                       cornerRadius: defBlockCornerRadius,
                                       fillColor: defFillColor,
@@ -62,6 +62,9 @@ class Tetromino {
         case .Z:
             arrangeZ()
         }
+        
+        let center = calculateCenter()
+        centralizeOn(point: center)
     }
     
     func createBlock(size: CGSize,
@@ -78,8 +81,23 @@ class Tetromino {
         block.position = CGPoint(x: x, y: y)
     }
     
+    func calculateCenter() -> CGPoint {
+        var sumPoint = CGPoint(x: 0.0, y: 0.0)
+        blocks.forEach { block in
+            sumPoint += block.position
+        }
+        return CGPoint(x: sumPoint.x / CGFloat(blocks.count),
+                       y: sumPoint.y / CGFloat(blocks.count))
+    }
+    
+    func centralizeOn(point: CGPoint) {
+        blocks.forEach { block in
+            block.position -= point
+        }
+    }
+    
     func arrageStraight() {
-        var xPos: CGFloat = 10.0
+        var xPos: CGFloat = 0.0
         let yPos: CGFloat = 0.0
         blocks.forEach { block in
             setBlockPosition(block: block, x: xPos, y: yPos)
