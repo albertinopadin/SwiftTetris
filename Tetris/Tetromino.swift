@@ -14,6 +14,11 @@ enum TetrominoType: CaseIterable {
 }
 
 class Tetromino {
+    static let ROTATE_CW_ACTION = SKAction.rotate(byAngle: CGFloat(-Double.pi/2),
+                                                  duration: 0.1)
+    static let ROTATE_CCW_ACTION = SKAction.rotate(toAngle: CGFloat(Double.pi/2),
+                                                   duration: 0.1)
+    
     var parentNode: SKNode
     var blocks: [SKShapeNode]
     let defBlockSize = CGSize(width: 50.0, height: 50.0)
@@ -168,18 +173,17 @@ class Tetromino {
         parentNode.removeFromParent()
     }
     
-    
-    // Add animations for these?
     func stepDown() {
+        // Add animation for this:
         parentNode.position.y += defBlockSize.height
     }
     
     func rotateClockwise() {
-        
+        parentNode.run(Tetromino.ROTATE_CW_ACTION)
     }
     
     func rotateCounterClockwise() {
-        
+        parentNode.run(Tetromino.ROTATE_CCW_ACTION)
     }
     
     func runAction(_ action: SKAction) {
