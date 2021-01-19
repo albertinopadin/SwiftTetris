@@ -14,18 +14,22 @@ enum TetrominoType: CaseIterable {
 }
 
 class Tetromino {
+    static let DEFAULT_BLOCK_SIZE = CGSize(width: 50.0, height: 50.0)
+    static let DEFAULT_BLOCK_CORNER_RADIUS: CGFloat = 7.0
+    
+    static let DEFAULT_FILL_COLOR = SKColor.blue
+    static let DEFAULT_STROKE_COLOR = SKColor.red
+    
     static let ROTATE_CW_ACTION = SKAction.rotate(byAngle: CGFloat(-Double.pi/2),
                                                   duration: 0.1)
     static let ROTATE_CCW_ACTION = SKAction.rotate(toAngle: CGFloat(Double.pi/2),
                                                    duration: 0.1)
+    static let STEP_DOWN_ACTION = SKAction.moveBy(x: 0.0,
+                                                  y: -DEFAULT_BLOCK_SIZE.height,
+                                                  duration: 0.2)
     
     var parentNode: SKNode
     var blocks: [SKShapeNode]
-    let defBlockSize = CGSize(width: 50.0, height: 50.0)
-    let defBlockCornerRadius: CGFloat = 5.0
-    
-    let defFillColor = SKColor.blue
-    let defStrokeColor = SKColor.red
     
     var position: CGPoint {
         get {
@@ -41,10 +45,10 @@ class Tetromino {
         blocks = [SKShapeNode]()
         
         for _ in 0...3 {
-            blocks.append(createBlock(size: defBlockSize,
-                                      cornerRadius: defBlockCornerRadius,
-                                      fillColor: defFillColor,
-                                      strokeColor: defStrokeColor))
+            blocks.append(createBlock(size: Tetromino.DEFAULT_BLOCK_SIZE,
+                                      cornerRadius: Tetromino.DEFAULT_BLOCK_CORNER_RADIUS,
+                                      fillColor: Tetromino.DEFAULT_FILL_COLOR,
+                                      strokeColor: Tetromino.DEFAULT_STROKE_COLOR))
         }
         
         blocks.forEach { block in
@@ -53,19 +57,19 @@ class Tetromino {
         
         switch type {
         case .Straight:
-            arrageStraight()
+            arrageStraight(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .Square:
-            arrangeSquare()
+            arrangeSquare(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .L:
-            arrangeL()
+            arrangeL(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .J:
-            arrangeJ()
+            arrangeJ(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .T:
-            arrangeT()
+            arrangeT(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .S:
-            arrangeS()
+            arrangeS(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         case .Z:
-            arrangeZ()
+            arrangeZ(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
         }
         
         let center = calculateCenter()
@@ -101,16 +105,16 @@ class Tetromino {
         }
     }
     
-    func arrageStraight() {
+    func arrageStraight(blockSize: CGSize) {
         var xPos: CGFloat = 0.0
         let yPos: CGFloat = 0.0
         blocks.forEach { block in
             setBlockPosition(block: block, x: xPos, y: yPos)
-            xPos += defBlockSize.width
+            xPos += blockSize.width
         }
     }
     
-    func arrangeSquare() {
+    func arrangeSquare(blockSize: CGSize) {
         let xPos: CGFloat = 10.0
         let yPos: CGFloat = 0.0
         
@@ -118,50 +122,50 @@ class Tetromino {
         let b1 = blocks[2], b2 = blocks[3]
         
         setBlockPosition(block: t1, x: xPos, y: yPos)
-        setBlockPosition(block: t2, x: xPos + defBlockSize.width, y: yPos)
+        setBlockPosition(block: t2, x: xPos + blockSize.width, y: yPos)
         
-        setBlockPosition(block: b1, x: xPos, y: yPos + defBlockSize.height)
+        setBlockPosition(block: b1, x: xPos, y: yPos + blockSize.height)
         setBlockPosition(block: b2,
-                         x: xPos + defBlockSize.width,
-                         y: yPos + defBlockSize.height)
+                         x: xPos + blockSize.width,
+                         y: yPos + blockSize.height)
     }
     
-    func arrangeL() {
-        arrageStraight()
+    func arrangeL(blockSize: CGSize) {
+        arrageStraight(blockSize: blockSize)
         let firstBlockPos = blocks.first!.position
-        blocks.first?.position = CGPoint(x: firstBlockPos.x + defBlockSize.width,
-                                         y: firstBlockPos.y + defBlockSize.height)
+        blocks.first?.position = CGPoint(x: firstBlockPos.x + blockSize.width,
+                                         y: firstBlockPos.y + blockSize.height)
     }
     
-    func arrangeJ() {
-        arrageStraight()
+    func arrangeJ(blockSize: CGSize) {
+        arrageStraight(blockSize: blockSize)
         let lastBlockPos = blocks.last!.position
-        blocks.last?.position = CGPoint(x: lastBlockPos.x - defBlockSize.width,
-                                        y: lastBlockPos.y + defBlockSize.height)
+        blocks.last?.position = CGPoint(x: lastBlockPos.x - blockSize.width,
+                                        y: lastBlockPos.y + blockSize.height)
     }
     
-    func arrangeT() {
-        arrageStraight()
+    func arrangeT(blockSize: CGSize) {
+        arrageStraight(blockSize: blockSize)
         let firstBlockPos = blocks.first!.position
-        blocks.first?.position = CGPoint(x: firstBlockPos.x + (defBlockSize.width * 2),
-                                         y: firstBlockPos.y + defBlockSize.height)
+        blocks.first?.position = CGPoint(x: firstBlockPos.x + (blockSize.width * 2),
+                                         y: firstBlockPos.y + blockSize.height)
     }
     
-    func arrangeS() {
-        arrangeSquare()
+    func arrangeS(blockSize: CGSize) {
+        arrangeSquare(blockSize: blockSize)
         let bottom2 = blocks[2...3]
         bottom2.forEach { block in
             let ogPos = block.position
-            block.position = CGPoint(x: ogPos.x - defBlockSize.width, y: ogPos.y)
+            block.position = CGPoint(x: ogPos.x - blockSize.width, y: ogPos.y)
         }
     }
     
-    func arrangeZ() {
-        arrangeSquare()
+    func arrangeZ(blockSize: CGSize) {
+        arrangeSquare(blockSize: blockSize)
         let bottom2 = blocks[2...3]
         bottom2.forEach { block in
             let ogPos = block.position
-            block.position = CGPoint(x: ogPos.x + defBlockSize.width, y: ogPos.y)
+            block.position = CGPoint(x: ogPos.x + blockSize.width, y: ogPos.y)
         }
     }
     
@@ -175,7 +179,8 @@ class Tetromino {
     
     func stepDown() {
         // Add animation for this:
-        parentNode.position.y += defBlockSize.height
+//        parentNode.position.y += defBlockSize.height
+        parentNode.run(Tetromino.STEP_DOWN_ACTION)
     }
     
     func rotateClockwise() {

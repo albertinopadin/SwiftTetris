@@ -35,11 +35,18 @@ class GameScene: SKScene {
         let randomRotation = getTetrominoRotationRandom()
         randomTetronimo.position = pos
         randomTetronimo.addToScene(self)
-        randomTetronimo.runAction(SKAction.sequence([SKAction.wait(forDuration: 1.0),
-                                                     randomRotation,
-                                                     SKAction.wait(forDuration: 1.0),
-                                                     SKAction.fadeOut(withDuration: 1.0),
-                                                     SKAction.removeFromParent()]))
+//        randomTetronimo.stepDown()
+//        randomTetronimo.runAction(SKAction.sequence([SKAction.wait(forDuration: 1.0),
+//                                                     randomRotation,
+//                                                     SKAction.wait(forDuration: 1.0),
+//                                                     SKAction.fadeOut(withDuration: 1.0),
+//                                                     SKAction.removeFromParent()]))
+        randomTetronimo.runAction(SKAction.repeatForever(SKAction.sequence([
+            SKAction.wait(forDuration: 1.0),
+            randomRotation,
+            SKAction.wait(forDuration: 1.0),
+            Tetromino.STEP_DOWN_ACTION
+        ])))
     }
     
     func touchMoved(toPoint pos : CGPoint) {
