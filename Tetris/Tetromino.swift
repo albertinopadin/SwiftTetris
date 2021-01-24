@@ -14,7 +14,7 @@ enum TetrominoType: CaseIterable {
 }
 
 class Tetromino {
-    static let DEFAULT_BLOCK_SIZE = CGSize(width: 50.0, height: 50.0)
+    static let DEFAULT_BLOCK_SIZE = CGSize(width: 30.0, height: 30.0)
     static let DEFAULT_BLOCK_CORNER_RADIUS: CGFloat = 7.0
     
     static let DEFAULT_FILL_COLOR = SKColor.blue
@@ -30,6 +30,7 @@ class Tetromino {
     
     var parentNode: SKNode
     var blocks: [SKShapeNode]
+    var blockSize: CGSize
     
     var position: CGPoint {
         get {
@@ -40,12 +41,15 @@ class Tetromino {
         }
     }
     
-    init(type: TetrominoType) {
+    init(type: TetrominoType, blockSize bsize: CGSize = Tetromino.DEFAULT_BLOCK_SIZE) {
+        // TODO: SKSpriteNode provides better performance than SKShapeNode.
+        //       would it be better to use SKSpriteNode?
         parentNode = SKNode()
         blocks = [SKShapeNode]()
+        blockSize = bsize
         
         for _ in 0...3 {
-            blocks.append(createBlock(size: Tetromino.DEFAULT_BLOCK_SIZE,
+            blocks.append(createBlock(size: blockSize,
                                       cornerRadius: Tetromino.DEFAULT_BLOCK_CORNER_RADIUS,
                                       fillColor: Tetromino.DEFAULT_FILL_COLOR,
                                       strokeColor: Tetromino.DEFAULT_STROKE_COLOR))
@@ -57,19 +61,19 @@ class Tetromino {
         
         switch type {
         case .Straight:
-            arrageStraight(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrageStraight(blockSize: blockSize)
         case .Square:
-            arrangeSquare(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeSquare(blockSize: blockSize)
         case .L:
-            arrangeL(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeL(blockSize: blockSize)
         case .J:
-            arrangeJ(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeJ(blockSize: blockSize)
         case .T:
-            arrangeT(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeT(blockSize: blockSize)
         case .S:
-            arrangeS(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeS(blockSize: blockSize)
         case .Z:
-            arrangeZ(blockSize: Tetromino.DEFAULT_BLOCK_SIZE)
+            arrangeZ(blockSize: blockSize)
         }
         
         let center = calculateCenter()

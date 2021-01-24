@@ -19,6 +19,7 @@
 		CE3BB4C325A2A45B003F2812 /* TetrisUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4C225A2A45B003F2812 /* TetrisUITests.swift */; };
 		CE3BB4D125A2A65D003F2812 /* Tetromino.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4D025A2A65D003F2812 /* Tetromino.swift */; };
 		CE3BB4D325B452DE003F2812 /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */; };
+		CE4C499325BDC1FB009B2ECB /* GameFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4C499225BDC1FB009B2ECB /* GameFrame.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		CE3BB4C425A2A45B003F2812 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CE3BB4D025A2A65D003F2812 /* Tetromino.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tetromino.swift; sourceTree = "<group>"; };
 		CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
+		CE4C499225BDC1FB009B2ECB /* GameFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameFrame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				CE3BB4AE25A2A45A003F2812 /* Info.plist */,
 				CE3BB4D025A2A65D003F2812 /* Tetromino.swift */,
 				CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */,
+				CE4C499225BDC1FB009B2ECB /* GameFrame.swift */,
 			);
 			path = Tetris;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE3BB4D125A2A65D003F2812 /* Tetromino.swift in Sources */,
+				CE4C499325BDC1FB009B2ECB /* GameFrame.swift in Sources */,
 				CE3BB4A325A2A458003F2812 /* GameScene.swift in Sources */,
 				CE3BB4D325B452DE003F2812 /* CGPointExtension.swift in Sources */,
 				CE3BB4A525A2A458003F2812 /* GameViewController.swift in Sources */,

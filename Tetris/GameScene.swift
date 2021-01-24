@@ -10,14 +10,34 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
+    let columns = 12
+    let blockSize: CGSize
+    
+    static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
+        let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
+        return CGSize(width: blockWidth, height: blockWidth)
+    }
+    
+    override init(size: CGSize) {
+        blockSize = GameScene.calculateBlockSize(viewFrameWidth: size.width,
+                                                 numberOfColumns: columns)
+        super.init(size: size)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func didMove(to view: SKView) {
+        self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         
+        let gameFrame = GameFrame(frameSize: view.frame.size, edgeWidth: 10)
+        self.addChild(gameFrame.frameNode)
     }
     
     func createRandomTetrisShape() -> Tetromino {
         let randomShapeType = TetrominoType.allCases.randomElement()!
-        let randomTetronimo = Tetromino(type: randomShapeType)
+        let randomTetronimo = Tetromino(type: randomShapeType, blockSize: blockSize)
         return randomTetronimo
     }
     
