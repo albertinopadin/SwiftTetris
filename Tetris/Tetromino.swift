@@ -76,7 +76,7 @@ class Tetromino {
             arrangeZ(blockSize: blockSize)
         }
         
-        let center = calculateCenter()
+        let center = calculateCenterInBlock()
         centralizeOn(point: center)
     }
     
@@ -94,6 +94,19 @@ class Tetromino {
         block.position = CGPoint(x: x, y: y)
     }
     
+    func getNearestBlock(to point: CGPoint) -> SKShapeNode {
+        var nearest = blocks.first!
+        var smallestDistance: CGFloat = 1000000
+        blocks.forEach { block in
+            let distance = block.position.distanceSquared(to: point)
+            if distance < smallestDistance {
+                smallestDistance = distance
+                nearest = block
+            }
+        }
+        return nearest
+    }
+    
     func calculateCenter() -> CGPoint {
         var sumPoint = CGPoint(x: 0.0, y: 0.0)
         blocks.forEach { block in
@@ -101,6 +114,12 @@ class Tetromino {
         }
         return CGPoint(x: sumPoint.x / CGFloat(blocks.count),
                        y: sumPoint.y / CGFloat(blocks.count))
+    }
+    
+    func calculateCenterInBlock() -> CGPoint {
+        let absoluteCenter = calculateCenter()
+        let nearestCenterBlock = getNearestBlock(to: absoluteCenter)
+        return nearestCenterBlock.position
     }
     
     func centralizeOn(point: CGPoint) {

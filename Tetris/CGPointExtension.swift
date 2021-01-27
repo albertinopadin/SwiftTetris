@@ -18,4 +18,10 @@ extension CGPoint {
         lhs.x -= rhs.x
         lhs.y -= rhs.y
     }
+    
+    func distanceSquared(to: CGPoint) -> CGFloat {
+        let xDiff = to.x - self.x
+        let yDiff = to.y - self.y
+        return (xDiff*xDiff) + (yDiff*yDiff)
+    }
 }
