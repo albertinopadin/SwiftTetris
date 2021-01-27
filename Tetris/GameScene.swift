@@ -9,18 +9,54 @@
 import SpriteKit
 import GameplayKit
 
+
+struct ColumnInfo {
+    let extent: (left: CGFloat, right: CGFloat)
+    var center: CGFloat {
+        get {
+            ((extent.right - extent.left) / 2) + extent.left
+        }
+    }
+}
+
+
 class GameScene: SKScene {
     let columns = 12
     let blockSize: CGSize
+    let columnsInfo: [ColumnInfo]
     
     static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
         let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
         return CGSize(width: blockWidth, height: blockWidth)
     }
     
+    static func calculateColumnsInfo(viewFrameWidth: CGFloat,
+                                     numberOfColumns: Int,
+                                     columnWidth: CGFloat) -> [ColumnInfo] {
+        var infos = [ColumnInfo]()
+        let frameWidthHalf: CGFloat = viewFrameWidth*0.5
+        for i in 0..<numberOfColumns {
+            infos.append(ColumnInfo(extent: (CGFloat(i)*columnWidth - frameWidthHalf,
+                                             CGFloat(i)*columnWidth + columnWidth - frameWidthHalf)))
+        }
+        return infos
+    }
+    
     override init(size: CGSize) {
         blockSize = GameScene.calculateBlockSize(viewFrameWidth: size.width,
                                                  numberOfColumns: columns)
+        columnsInfo = GameScene.calculateColumnsInfo(viewFrameWidth: size.width,                                                        numberOfColumns: columns,
+                                                     columnWidth: blockSize.width)
+        
+        print("Columns Info:")
+        columnsInfo.forEach { ci in
+            print("""
+                left extent: \(ci.extent.left);
+                right extent: \(ci.extent.right);
+                center: \(ci.center)
+                """)
+        }
+        
         super.init(size: size)
     }
     
@@ -49,11 +85,26 @@ class GameScene: SKScene {
         }
     }
     
+    func getClosestColumnCenter(touchPoint: CGPoint) -> CGFloat {
+        var closestCenter: CGFloat = 0.0
+        columnsInfo.forEach { ci in
+            if (touchPoint.x >= ci.extent.left && touchPoint.x <= ci.extent.right) {
+                closestCenter = ci.center
+            }
+        }
+        return closestCenter
+    }
+    
+    func getClosestColumnPosition(touchPoint: CGPoint) -> CGPoint {
+        let closestXCenter = getClosestColumnCenter(touchPoint: touchPoint)
+        print("Closest X Center: \(closestXCenter)")
+        return CGPoint(x: closestXCenter, y: touchPoint.y)
+    }
     
     func touchDown(atPoint pos : CGPoint) {
         let randomTetronimo = createRandomTetrisShape()
         let randomRotation = getTetrominoRotationRandom()
-        randomTetronimo.position = pos
+        randomTetronimo.position = getClosestColumnPosition(touchPoint: pos)
         randomTetronimo.addToScene(self)
 //        randomTetronimo.stepDown()
 //        randomTetronimo.runAction(SKAction.sequence([SKAction.wait(forDuration: 1.0),
