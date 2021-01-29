@@ -20,7 +20,7 @@ struct ColumnInfo {
 }
 
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     let columns = 12
     let blockSize: CGSize
     let columnsInfo: [ColumnInfo]
@@ -58,17 +58,24 @@ class GameScene: SKScene {
         }
         
         super.init(size: size)
+        setupPhysicsWorld()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setupPhysicsWorld() {
+        self.physicsWorld.gravity = CGVector.zero
+        self.physicsWorld.contactDelegate = self
+    }
+    
     override func didMove(to view: SKView) {
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         
-        let gameFrame = GameFrame(frameSize: view.frame.size, edgeWidth: 10)
+        let gameFrame = GameFrame(frame: view.frame, edgeWidth: 6)
         self.addChild(gameFrame.frameNode)
+        self.addChild(gameFrame.bottomNode)
     }
     
     func createRandomTetrisShape() -> Tetromino {
@@ -160,4 +167,20 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        let bodyA = contact.bodyA.node!
+        let bodyB = contact.bodyB.node!
+        
+        if bodyA.name == Tetromino.TETROMINO_NAME && bodyB.name == GameFrame.FRAME_NAME {
+            print("didBegin contact!")
+            bodyA.removeAllActions()
+        }
+        
+        if bodyB.name == Tetromino.TETROMINO_NAME && bodyA.name == GameFrame.FRAME_NAME {
+            print("didBegin contact!")
+            bodyB.removeAllActions()
+        }
+    }
+    
 }

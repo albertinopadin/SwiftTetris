@@ -28,6 +28,10 @@ class Tetromino {
                                                   y: -DEFAULT_BLOCK_SIZE.height,
                                                   duration: 0.2)
     
+    static let BLOCK_NAME = "Tetronimo_Block"
+    static let TETROMINO_NAME = "Tetronimo"
+    static let CATEGORY_BM: UInt32 = 0x1 << 1
+    
     var parentNode: SKNode
     var blocks: [SKShapeNode]
     var blockSize: CGSize
@@ -49,7 +53,7 @@ class Tetromino {
         blockSize = bsize
         
         for _ in 0...3 {
-            blocks.append(createBlock(size: blockSize,
+            blocks.append(Tetromino.createBlock(size: blockSize,
                                       cornerRadius: Tetromino.DEFAULT_BLOCK_CORNER_RADIUS,
                                       fillColor: Tetromino.DEFAULT_FILL_COLOR,
                                       strokeColor: Tetromino.DEFAULT_STROKE_COLOR))
@@ -78,16 +82,44 @@ class Tetromino {
         
         let center = calculateCenterInBlock()
         centralizeOn(point: center)
+        
+        // Need to do this here, after the individual blocks have been positioned:
+        let shapePhysicsBody = getShapePhysicsBody()
+        setupPhysics(with: shapePhysicsBody)
     }
     
-    func createBlock(size: CGSize,
-                     cornerRadius: CGFloat,
-                     fillColor: SKColor,
-                     strokeColor: SKColor) -> SKShapeNode {
+    static func createBlock(size: CGSize,
+                            cornerRadius: CGFloat,
+                            fillColor: SKColor,
+                            strokeColor: SKColor) -> SKShapeNode {
         let block = SKShapeNode(rectOf: size, cornerRadius: cornerRadius)
         block.fillColor = fillColor
         block.strokeColor = strokeColor
         return block
+    }
+    
+    static func getShapePoints(inBlocks: [SKShapeNode]) -> [CGPoint] {
+        var points = [CGPoint]()
+        inBlocks.forEach { block in
+            let blockPos = block.position
+            let blockSize = block.frame.size
+            let topLeft = CGPoint(x: blockPos.x - blockSize.width/2,
+                                  y: blockPos.y + blockSize.height/2)
+            let topRight = CGPoint(x: blockPos.x + blockSize.width/2,
+                                  y: blockPos.y + blockSize.height/2)
+            let botLeft = CGPoint(x: blockPos.x - blockSize.width/2,
+                                  y: blockPos.y - blockSize.height/2)
+            let botRight = CGPoint(x: blockPos.x + blockSize.width/2,
+                                  y: blockPos.y - blockSize.height/2)
+            points.append(contentsOf: [topLeft, topRight, botLeft, botRight])
+        }
+        
+        points = points.reduce(into: [CGPoint]()) { filtered, point in
+            if filtered.last != point {
+                filtered.append(point)
+            }
+        }
+        return points
     }
     
     func setBlockPosition(block: SKShapeNode, x: CGFloat, y: CGFloat) {
@@ -126,6 +158,24 @@ class Tetromino {
         blocks.forEach { block in
             block.position -= point
         }
+    }
+    
+    func getShapePhysicsBody() -> SKPhysicsBody {
+        let physicsBodies = blocks.map { block in
+            SKPhysicsBody(rectangleOf: block.frame.size, center: block.position)
+        }
+        
+        return SKPhysicsBody(bodies: physicsBodies)
+    }
+    
+    func setupPhysics(with physicsBody: SKPhysicsBody) {
+        parentNode.physicsBody = physicsBody
+        parentNode.physicsBody?.isDynamic = true
+        parentNode.physicsBody?.usesPreciseCollisionDetection = true
+        parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
+        parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
+        parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
+        parentNode.name = Tetromino.TETROMINO_NAME
     }
     
     func arrageStraight(blockSize: CGSize) {
