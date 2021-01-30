@@ -21,6 +21,7 @@ struct ColumnInfo {
 
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    let minimumVerticalNormalContact: CGFloat = 0.99
     let columns = 12
     let blockSize: CGSize
     let columnsInfo: [ColumnInfo]
@@ -123,11 +124,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let randomTetronimo = createRandomTetrisShape()
         randomTetronimo.position = getClosestColumnPosition(atPoint: pos)
         randomTetronimo.addToScene(self)
-        randomTetronimo.runAction(SKAction.repeatForever(SKAction.sequence([
-            SKAction.wait(forDuration: 1.0),
-            Tetromino.STEP_DOWN_ACTION
-        ])))
-        
+        randomTetronimo.setStepdownAction(stepInterval: 0.1)
         activeTetromino = randomTetronimo
     }
     
@@ -176,22 +173,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Called before each frame is rendered
     }
     
+    func stopActiveTetromino() {
+        activeTetromino?.stop()
+        insertRandomTetrominoAtTop()
+    }
+    
     func didBegin(_ contact: SKPhysicsContact) {
         let bodyA = contact.bodyA.node!
         let bodyB = contact.bodyB.node!
         
-        if bodyA.name == Tetromino.TETROMINO_NAME && bodyB.name == GameFrame.FRAME_NAME {
-            print("didBegin contact!")
-//            bodyA.removeAllActions()
-            activeTetromino?.stop()
-            insertRandomTetrominoAtTop()
+        print("Contact Normal: \(contact.contactNormal)")
+        
+        if bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+            bodyB.name == GameFrame.FRAME_NAME {
+            print("didBegin contact [Block & Frame]")
+            stopActiveTetromino()
         }
         
-        if bodyB.name == Tetromino.TETROMINO_NAME && bodyA.name == GameFrame.FRAME_NAME {
-            print("didBegin contact!")
-//            bodyB.removeAllActions()
-            activeTetromino?.stop()
-            insertRandomTetrominoAtTop()
+        if bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+            bodyA.name == GameFrame.FRAME_NAME {
+            print("didBegin contact [Block & Frame]")
+            stopActiveTetromino()
+        }
+        
+        if (bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+            bodyB.name == Tetromino.STOPPED_TETROMINO_NAME) ||
+           (bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+            bodyA.name == Tetromino.STOPPED_TETROMINO_NAME) {
+            print("didBegin contact [Block & Block]")
+            if contact.contactNormal.dy > minimumVerticalNormalContact {
+                stopActiveTetromino()
+            }
         }
     }
     

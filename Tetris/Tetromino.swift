@@ -31,8 +31,8 @@ class Tetromino {
                                                   y: -DEFAULT_BLOCK_SIZE.height,
                                                   duration: 0.2)
     
-    static let BLOCK_NAME = "Tetronimo_Block"
-    static let TETROMINO_NAME = "Tetronimo"
+    static let ACTIVE_TETROMINO_NAME = "active_tetronimo"
+    static let STOPPED_TETROMINO_NAME = "stopped_tetronimo"
     static let CATEGORY_BM: UInt32 = 0x1 << 1
     
     var parentNode: SKNode
@@ -52,6 +52,7 @@ class Tetromino {
         // TODO: SKSpriteNode provides better performance than SKShapeNode.
         //       would it be better to use SKSpriteNode?
         parentNode = SKNode()
+        parentNode.name = Tetromino.ACTIVE_TETROMINO_NAME
         blocks = [SKShapeNode]()
         blockSize = bsize
         
@@ -164,8 +165,12 @@ class Tetromino {
     }
     
     func getShapePhysicsBody() -> SKPhysicsBody {
+        let visibleBlockSize = blocks.first!.frame.size
+        let reducedSize = CGSize(width: visibleBlockSize.width * 0.9,
+                                 height: visibleBlockSize.height * 0.9)
+        
         let physicsBodies = blocks.map { block in
-            SKPhysicsBody(rectangleOf: block.frame.size, center: block.position)
+            return SKPhysicsBody(rectangleOf: reducedSize, center: block.position)
         }
         
         return SKPhysicsBody(bodies: physicsBodies)
@@ -178,7 +183,6 @@ class Tetromino {
         parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
         parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
         parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
-        parentNode.name = Tetromino.TETROMINO_NAME
     }
     
     func arrageStraight(blockSize: CGSize) {
@@ -253,6 +257,13 @@ class Tetromino {
         parentNode.removeFromParent()
     }
     
+    func setStepdownAction(stepInterval: TimeInterval) {
+        parentNode.run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.wait(forDuration: stepInterval),
+            Tetromino.STEP_DOWN_ACTION
+        ])))
+    }
+    
     func stepDown() {
         // Add animation for this:
 //        parentNode.position.y += defBlockSize.height
@@ -274,6 +285,7 @@ class Tetromino {
     }
     
     func stop() {
+        parentNode.name = Tetromino.STOPPED_TETROMINO_NAME
         parentNode.removeAllActions()
         parentNode.physicsBody?.isDynamic = false
     }
