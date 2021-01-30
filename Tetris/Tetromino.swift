@@ -20,9 +20,12 @@ class Tetromino {
     static let DEFAULT_FILL_COLOR = SKColor.blue
     static let DEFAULT_STROKE_COLOR = SKColor.red
     
+    static let KEY_ROTATE_CW_ACTION = "rotate_cw"
+    static let KEY_ROTATE_CCW_ACTION = "rotate_ccw"
+    
     static let ROTATE_CW_ACTION = SKAction.rotate(byAngle: CGFloat(-Double.pi/2),
                                                   duration: 0.1)
-    static let ROTATE_CCW_ACTION = SKAction.rotate(toAngle: CGFloat(Double.pi/2),
+    static let ROTATE_CCW_ACTION = SKAction.rotate(byAngle: CGFloat(Double.pi/2),
                                                    duration: 0.1)
     static let STEP_DOWN_ACTION = SKAction.moveBy(x: 0.0,
                                                   y: -DEFAULT_BLOCK_SIZE.height,
@@ -257,14 +260,21 @@ class Tetromino {
     }
     
     func rotateClockwise() {
-        parentNode.run(Tetromino.ROTATE_CW_ACTION)
+        parentNode.removeAction(forKey: Tetromino.KEY_ROTATE_CCW_ACTION)
+        parentNode.run(Tetromino.ROTATE_CW_ACTION, withKey: Tetromino.KEY_ROTATE_CW_ACTION)
     }
     
     func rotateCounterClockwise() {
-        parentNode.run(Tetromino.ROTATE_CCW_ACTION)
+        parentNode.removeAction(forKey: Tetromino.KEY_ROTATE_CW_ACTION)
+        parentNode.run(Tetromino.ROTATE_CCW_ACTION, withKey: Tetromino.KEY_ROTATE_CCW_ACTION)
     }
     
     func runAction(_ action: SKAction) {
         parentNode.run(action)
+    }
+    
+    func stop() {
+        parentNode.removeAllActions()
+        parentNode.physicsBody?.isDynamic = false
     }
 }
