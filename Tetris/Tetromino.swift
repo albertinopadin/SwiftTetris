@@ -16,7 +16,26 @@ enum TetrominoType: CaseIterable {
 class Tetromino {
     static let DEFAULT_BLOCK_SIZE = CGSize(width: 30.0, height: 30.0)
     static let DEFAULT_BLOCK_CORNER_RADIUS: CGFloat = 7.0
+    
     static let PHYSICS_BODY_SIZE_RATIO: CGFloat = 0.95
+    
+    static let RADS_45_DEG = Tetromino.convertToRadians(degrees: 45.0)
+    static let RADS_90_DEG = Tetromino.convertToRadians(degrees: 90.0)
+    static let RADS_135_DEG = Tetromino.convertToRadians(degrees: 135.0)
+    static let RADS_180_DEG = Tetromino.convertToRadians(degrees: 180.0)
+    static let RADS_225_DEG = Tetromino.convertToRadians(degrees: 225.0)
+    static let RADS_270_DEG = Tetromino.convertToRadians(degrees: 270.0)
+    static let RADS_315_DEG = Tetromino.convertToRadians(degrees: 315.0)
+    
+    static let ROTATION_CONSTRAINTS = [
+        SKConstraint.zRotation(SKRange(lowerLimit: 0, upperLimit: 0)),
+        SKConstraint.zRotation(SKRange(lowerLimit: Tetromino.RADS_90_DEG,
+                                       upperLimit: Tetromino.RADS_90_DEG)),
+        SKConstraint.zRotation(SKRange(lowerLimit: Tetromino.RADS_180_DEG,
+                                       upperLimit: Tetromino.RADS_180_DEG)),
+        SKConstraint.zRotation(SKRange(lowerLimit: Tetromino.RADS_270_DEG,
+                                       upperLimit: Tetromino.RADS_270_DEG))
+    ]
     
     static let DEFAULT_FILL_COLOR = SKColor.blue
     static let DEFAULT_STROKE_COLOR = SKColor.red
@@ -39,6 +58,7 @@ class Tetromino {
     var parentNode: SKNode
     var blocks: [SKShapeNode]
     var blockSize: CGSize
+    var rotationIndex = 0
     
     var position: CGPoint {
         get {
@@ -91,6 +111,10 @@ class Tetromino {
         // Need to do this here, after the individual blocks have been positioned:
         let shapePhysicsBody = getShapePhysicsBody()
         setupPhysics(with: shapePhysicsBody)
+    }
+    
+    static func convertToRadians(degrees: CGFloat) -> CGFloat {
+        return degrees * .pi / 180
     }
     
     static func createBlock(size: CGSize,
@@ -187,6 +211,16 @@ class Tetromino {
         parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
         parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
         parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
+//        parentNode.constraints = getConstraints(rIndex: rotationIndex)
+    }
+    
+    func getConstraints(rIndex: Int) -> [SKConstraint] {
+        return [Tetromino.ROTATION_CONSTRAINTS[circular: rIndex]!]
+    }
+    
+    func applyConstraints(rIndex: Int) {
+        parentNode.constraints = getConstraints(rIndex: rIndex)
+//        parentNode.constraints = nil
     }
     
     func arrageStraight(blockSize: CGSize) {
@@ -276,12 +310,43 @@ class Tetromino {
     
     func rotateClockwise() {
         parentNode.removeAction(forKey: Tetromino.KEY_ROTATE_CCW_ACTION)
+        rotationIndex -= 1
+        applyConstraints(rIndex: rotationIndex)
         parentNode.run(Tetromino.ROTATE_CW_ACTION, withKey: Tetromino.KEY_ROTATE_CW_ACTION)
+//        checkNodeAngle()
     }
     
     func rotateCounterClockwise() {
         parentNode.removeAction(forKey: Tetromino.KEY_ROTATE_CW_ACTION)
+        rotationIndex += 1
+        applyConstraints(rIndex: rotationIndex)
         parentNode.run(Tetromino.ROTATE_CCW_ACTION, withKey: Tetromino.KEY_ROTATE_CCW_ACTION)
+//        checkNodeAngle()
+    }
+    
+    func checkNodeAngle() {
+        let rotation = parentNode.zRotation
+        print("zRotation: \(rotation)")
+        
+        if rotation > -Tetromino.RADS_45_DEG && rotation < Tetromino.RADS_45_DEG {
+            print("Setting zRotation to 0")
+            parentNode.zRotation = 0
+        }
+        
+        if rotation > Tetromino.RADS_45_DEG && rotation < Tetromino.RADS_135_DEG {
+            print("Setting zRotation to 90")
+            parentNode.zRotation = Tetromino.RADS_90_DEG
+        }
+        
+        if rotation > Tetromino.RADS_135_DEG && rotation < Tetromino.RADS_225_DEG {
+            print("Setting zRotation to 180")
+            parentNode.zRotation = Tetromino.RADS_180_DEG
+        }
+        
+        if rotation > Tetromino.RADS_225_DEG && rotation < Tetromino.RADS_315_DEG {
+            print("Setting zRotation to 270")
+            parentNode.zRotation = Tetromino.RADS_270_DEG
+        }
     }
     
     func runAction(_ action: SKAction) {

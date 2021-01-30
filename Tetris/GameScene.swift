@@ -28,6 +28,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let topMidpoint: CGPoint
     let screenMidpointX: CGFloat
     var activeTetromino: Tetromino?
+    let defaultStepInterval = 0.3
     
     static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
         let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
@@ -124,7 +125,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let randomTetronimo = createRandomTetrisShape()
         randomTetronimo.position = getClosestColumnPosition(atPoint: pos)
         randomTetronimo.addToScene(self)
-        randomTetronimo.setStepdownAction(stepInterval: 0.1)
+        randomTetronimo.setStepdownAction(stepInterval: defaultStepInterval)
         activeTetromino = randomTetronimo
     }
     
