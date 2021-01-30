@@ -16,6 +16,7 @@ enum TetrominoType: CaseIterable {
 class Tetromino {
     static let DEFAULT_BLOCK_SIZE = CGSize(width: 30.0, height: 30.0)
     static let DEFAULT_BLOCK_CORNER_RADIUS: CGFloat = 7.0
+    static let PHYSICS_BODY_SIZE_RATIO: CGFloat = 0.95
     
     static let DEFAULT_FILL_COLOR = SKColor.blue
     static let DEFAULT_STROKE_COLOR = SKColor.red
@@ -166,8 +167,10 @@ class Tetromino {
     
     func getShapePhysicsBody() -> SKPhysicsBody {
         let visibleBlockSize = blocks.first!.frame.size
-        let reducedSize = CGSize(width: visibleBlockSize.width * 0.9,
-                                 height: visibleBlockSize.height * 0.9)
+        let reducedSize = CGSize(width: visibleBlockSize.width *
+                                        Tetromino.PHYSICS_BODY_SIZE_RATIO,
+                                 height: visibleBlockSize.height *
+                                        Tetromino.PHYSICS_BODY_SIZE_RATIO)
         
         let physicsBodies = blocks.map { block in
             return SKPhysicsBody(rectangleOf: reducedSize, center: block.position)
@@ -179,7 +182,8 @@ class Tetromino {
     func setupPhysics(with physicsBody: SKPhysicsBody) {
         parentNode.physicsBody = physicsBody
         parentNode.physicsBody?.isDynamic = true
-        parentNode.physicsBody?.usesPreciseCollisionDetection = true
+        parentNode.physicsBody?.allowsRotation = false
+//        parentNode.physicsBody?.usesPreciseCollisionDetection = true
         parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
         parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
         parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
