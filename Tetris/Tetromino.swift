@@ -211,7 +211,6 @@ class Tetromino {
         parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
         parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
         parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
-//        parentNode.constraints = getConstraints(rIndex: rotationIndex)
     }
     
     func getConstraints(rIndex: Int) -> [SKConstraint] {
@@ -220,7 +219,6 @@ class Tetromino {
     
     func applyConstraints(rIndex: Int) {
         parentNode.constraints = getConstraints(rIndex: rIndex)
-//        parentNode.constraints = nil
     }
     
     func arrageStraight(blockSize: CGSize) {

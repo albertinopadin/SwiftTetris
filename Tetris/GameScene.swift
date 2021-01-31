@@ -23,12 +23,16 @@ struct ColumnInfo {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     let minimumVerticalNormalContact: CGFloat = 0.99
     let columns = 12
+    let rows: Int
+    var rowCounts: [Int]
+    var stoppedNodesRows: [[SKShapeNode?]]
     let blockSize: CGSize
     let columnsInfo: [ColumnInfo]
     let topMidpoint: CGPoint
     let screenMidpointX: CGFloat
     var activeTetromino: Tetromino?
     let defaultStepInterval = 0.3
+    let viewSize: CGSize
     
     static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
         let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
@@ -47,14 +51,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return infos
     }
     
+    static func calculateNumberOfRows(viewFrameHeight: CGFloat, blockHeight: CGFloat) -> Int {
+        return Int(viewFrameHeight / blockHeight)
+    }
+    
     override init(size: CGSize) {
+        print("View size: \(size)")
+        viewSize = size
         blockSize = GameScene.calculateBlockSize(viewFrameWidth: size.width,
                                                  numberOfColumns: columns)
-        columnsInfo = GameScene.calculateColumnsInfo(viewFrameWidth: size.width,                                                        numberOfColumns: columns,
+        columnsInfo = GameScene.calculateColumnsInfo(viewFrameWidth: size.width,                                                                          numberOfColumns: columns,
                                                      columnWidth: blockSize.width)
         
         screenMidpointX = 0
         topMidpoint = CGPoint(x: screenMidpointX, y: size.height/2)
+        rows = GameScene.calculateNumberOfRows(viewFrameHeight: size.height, blockHeight: blockSize.height)
+        print("Number of rows: \(rows)")
+        rowCounts = [Int].init(repeating: 0, count: rows)
+        stoppedNodesRows = [[SKShapeNode?]].init(repeating: [SKShapeNode?].init(repeating: nil, count: columns),
+                                                 count: rows)
         super.init(size: size)
         setupPhysicsWorld()
 //        printColumnsInfo()
@@ -174,8 +189,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Called before each frame is rendered
     }
     
+    func insertIntoStoppedBlockArray(block: SKShapeNode, row: Int, column: Int) {
+        stoppedNodesRows[row][column] = block
+    }
+    
+    func getRowAndColumnFromPosition(position: CGPoint) -> (Int, Int) {
+        print("Block position: \(position)")
+        let halfHeight = viewSize.height/2
+        let halfWidth = viewSize.width/2
+        let blockWidthFloat = CGFloat(blockSize.width)
+        let blockHeightFloat = CGFloat(blockSize.height)
+        let row = Int(position.y / blockHeightFloat) + Int(halfHeight / blockHeightFloat)
+        let column = Int(position.x / blockWidthFloat) + Int(halfWidth / blockWidthFloat)
+        return (row, column)
+    }
+    
+    func getBlockPositionInSceneCoordinates(_ block: SKShapeNode, parentPosition: CGPoint) -> CGPoint {
+        let blockPositionInParent = block.position
+        return parentPosition + blockPositionInParent
+    }
+    
+    func transferBlockToSelf(block: SKShapeNode) {
+        let blockParentPosition = block.parent!.position
+        let blockPosition = getBlockPositionInSceneCoordinates(block, parentPosition: blockParentPosition)
+        let blockParentRotation = block.parent!.zRotation
+        block.removeFromParent()
+        addChild(block)
+        block.position = blockPosition
+        block.rotateRelativeTo(origin: blockParentPosition, byRadians: blockParentRotation)
+    }
+    
+    func insertStoppedTetrominoBlocksIntoSelf(tetrominoBlocks: [SKShapeNode]) {
+        // Get position of each block
+        // Based on position insert in internal array of arrays:
+        tetrominoBlocks.forEach { block in
+            let (row, column) = getRowAndColumnFromPosition(position: block.position)
+            insertIntoStoppedBlockArray(block: block, row: row, column: column)
+            transferBlockToSelf(block: block)
+        }
+    }
+    
     func stopActiveTetromino() {
         activeTetromino?.stop()
+        insertStoppedTetrominoBlocksIntoSelf(tetrominoBlocks: activeTetromino!.blocks)
         insertRandomTetrominoAtTop()
     }
     

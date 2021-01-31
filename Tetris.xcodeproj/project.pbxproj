@@ -21,6 +21,7 @@
 		CE3BB4D325B452DE003F2812 /* CGPointExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */; };
 		CE4C499325BDC1FB009B2ECB /* GameFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4C499225BDC1FB009B2ECB /* GameFrame.swift */; };
 		CE4C499725C58EDA009B2ECB /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4C499625C58EDA009B2ECB /* ArrayExtension.swift */; };
+		CE4C499B25C67FC4009B2ECB /* SKShapeNodeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4C499A25C67FC4009B2ECB /* SKShapeNodeExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +62,7 @@
 		CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointExtension.swift; sourceTree = "<group>"; };
 		CE4C499225BDC1FB009B2ECB /* GameFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameFrame.swift; sourceTree = "<group>"; };
 		CE4C499625C58EDA009B2ECB /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
+		CE4C499A25C67FC4009B2ECB /* SKShapeNodeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKShapeNodeExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,9 +123,10 @@
 				CE3BB4AB25A2A45A003F2812 /* LaunchScreen.storyboard */,
 				CE3BB4AE25A2A45A003F2812 /* Info.plist */,
 				CE3BB4D025A2A65D003F2812 /* Tetromino.swift */,
-				CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */,
 				CE4C499225BDC1FB009B2ECB /* GameFrame.swift */,
 				CE4C499625C58EDA009B2ECB /* ArrayExtension.swift */,
+				CE3BB4D225B452DE003F2812 /* CGPointExtension.swift */,
+				CE4C499A25C67FC4009B2ECB /* SKShapeNodeExtension.swift */,
 			);
 			path = Tetris;
 			sourceTree = "<group>";
@@ -286,6 +289,7 @@
 				CE4C499725C58EDA009B2ECB /* ArrayExtension.swift in Sources */,
 				CE3BB4A525A2A458003F2812 /* GameViewController.swift in Sources */,
 				CE3BB49D25A2A458003F2812 /* AppDelegate.swift in Sources */,
+				CE4C499B25C67FC4009B2ECB /* SKShapeNodeExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
