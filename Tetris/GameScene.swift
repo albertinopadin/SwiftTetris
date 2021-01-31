@@ -31,8 +31,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let topMidpoint: CGPoint
     let screenMidpointX: CGFloat
     var activeTetromino: Tetromino?
-    let defaultStepInterval = 0.3
+    let defaultStepInterval: TimeInterval = 0.1
     let viewSize: CGSize
+    let debounceTime: TimeInterval = 0.1
+    var lastBlockStopTime: TimeInterval = 0.0
+    var _currentTime: TimeInterval = 0.0
     
     static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
         let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
@@ -102,8 +105,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(gameFrame.frameNode)
         self.addChild(gameFrame.bottomNode)
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tapRecognizer)
+        
+        let rightSwipeRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+        rightSwipeRecognizer.direction = .right
+        
+        let leftSwipeRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+        leftSwipeRecognizer.direction = .left
+        
+        view.addGestureRecognizer(rightSwipeRecognizer)
+        view.addGestureRecognizer(leftSwipeRecognizer)
+        
         // Start game:
         insertRandomTetrominoAtTop()
+    }
+    
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {
+        if recognizer.state == .ended {
+            let touchLocation = recognizer.location(in: self.view!)
+            if let active = activeTetromino {
+                if touchLocation.x > screenMidpointX {
+                    print("Rotating cw")
+                    active.rotateClockwise()
+                } else {
+                    print("Rotating CCW")
+                    active.rotateCounterClockwise()
+                }
+            }
+        }
+    }
+    
+    @objc func handleSwipe(recognizer: UISwipeGestureRecognizer) {
+        let direction = recognizer.direction
+        print("Swipe direction: \(direction)")
+        
+        if direction == .right {
+            activeTetromino?.moveRight()
+        }
+        
+        if direction == .left {
+            activeTetromino?.moveLeft()
+        }
     }
     
     func createRandomTetrisShape() -> Tetromino {
@@ -149,15 +192,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchDown(atPoint pos : CGPoint) {
-        if let active = activeTetromino {
-            if pos.x > screenMidpointX {
-                print("Rotating cw")
-                active.rotateClockwise()
-            } else {
-                print("Rotating CCW")
-                active.rotateCounterClockwise()
-            }
-        }
+        
     }
     
     func touchMoved(toPoint pos : CGPoint) {
@@ -187,6 +222,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        _currentTime = currentTime
     }
     
     func insertIntoStoppedBlockArray(block: SKShapeNode, row: Int, column: Int) {
@@ -209,57 +245,117 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return parentPosition + blockPositionInParent
     }
     
-    func transferBlockToSelf(block: SKShapeNode) {
-        let blockParentPosition = block.parent!.position
-        let blockPosition = getBlockPositionInSceneCoordinates(block, parentPosition: blockParentPosition)
-        let blockParentRotation = block.parent!.zRotation
-        block.removeFromParent()
-        addChild(block)
-        block.position = blockPosition
-        block.rotateRelativeTo(origin: blockParentPosition, byRadians: blockParentRotation)
+    func constructPhysicsBody(block: SKShapeNode) -> SKPhysicsBody {
+        let visibleBlockSize = block.frame.size
+        let reducedSize = CGSize(width: visibleBlockSize.width *
+                                        Tetromino.PHYSICS_BODY_SIZE_RATIO,
+                                 height: visibleBlockSize.height *
+                                        Tetromino.PHYSICS_BODY_SIZE_RATIO)
+        
+        let physicsBody = SKPhysicsBody(rectangleOf: reducedSize, center: block.position)
+        physicsBody.isDynamic = false
+        physicsBody.allowsRotation = false
+        physicsBody.usesPreciseCollisionDetection = true
+        physicsBody.categoryBitMask = Tetromino.CATEGORY_BM
+        physicsBody.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
+        physicsBody.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
+        return physicsBody
     }
     
-    func insertStoppedTetrominoBlocksIntoSelf(tetrominoBlocks: [SKShapeNode]) {
+    func transferBlockToSelf(block: SKShapeNode) {
+        let blockParentPosition = block.parent!.position
+        let blockParentRotation = block.parent!.zRotation
+        let blockPosition = getBlockPositionInSceneCoordinates(block, parentPosition: blockParentPosition)
+        block.removeFromParent()
+        block.position = blockPosition
+        block.rotateRelativeTo(origin: blockParentPosition, byRadians: blockParentRotation)
+        addChild(block)
+        block.physicsBody = constructPhysicsBody(block: block)
+    }
+    
+    func insertStoppedTetrominoBlocksIntoSelf() {
         // Get position of each block
         // Based on position insert in internal array of arrays:
-        tetrominoBlocks.forEach { block in
+        activeTetromino!.blocks.forEach { block in
             let (row, column) = getRowAndColumnFromPosition(position: block.position)
             insertIntoStoppedBlockArray(block: block, row: row, column: column)
             transferBlockToSelf(block: block)
+        }
+        
+        activeTetromino!.removeFromScene()
+    }
+    
+    func calculateRows() {
+        for (idx, row) in stoppedNodesRows.enumerated() {
+            row.forEach { column in
+                if let _ = column {
+                    rowCounts[idx] += 1
+                }
+            }
+        }
+    }
+    
+    func removeStoppedNodeRow(rowIdx: Int) {
+        stoppedNodesRows[rowIdx].forEach { node in
+            if let node = node {
+                node.physicsBody = nil
+                node.removeFromParent()
+                // TODO: WARNING: MEMORY LEAK CAN HAPPEN HERE!
+            }
+        }
+        
+        stoppedNodesRows[rowIdx].removeAll()
+        stoppedNodesRows[rowIdx] = [SKShapeNode?].init(repeating: nil, count: columns)
+    }
+    
+    func removeFullRows() {
+        for (idx, rowCount) in rowCounts.enumerated() {
+            if rowCount >= columns {
+                removeStoppedNodeRow(rowIdx: idx)
+            }
         }
     }
     
     func stopActiveTetromino() {
         activeTetromino?.stop()
-        insertStoppedTetrominoBlocksIntoSelf(tetrominoBlocks: activeTetromino!.blocks)
+//        insertStoppedTetrominoBlocksIntoSelf()  // <- BUG HERE!
+//        calculateRows()
+//        removeFullRows()
+        // methodToRunToAnimateNonFullRowBlocksFalling()
+        // recalculateRows() ???
         insertRandomTetrominoAtTop()
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        let bodyA = contact.bodyA.node!
-        let bodyB = contact.bodyB.node!
-        
-        print("Contact Normal: \(contact.contactNormal)")
-        
-        if bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
-            bodyB.name == GameFrame.FRAME_NAME {
-            print("didBegin contact [Block & Frame]")
-            stopActiveTetromino()
-        }
-        
-        if bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
-            bodyA.name == GameFrame.FRAME_NAME {
-            print("didBegin contact [Block & Frame]")
-            stopActiveTetromino()
-        }
-        
-        if (bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
-            bodyB.name == Tetromino.STOPPED_TETROMINO_NAME) ||
-           (bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
-            bodyA.name == Tetromino.STOPPED_TETROMINO_NAME) {
-            print("didBegin contact [Block & Block]")
-            if contact.contactNormal.dy > minimumVerticalNormalContact {
+        if _currentTime - lastBlockStopTime > debounceTime {
+            let bodyA = contact.bodyA.node!
+            let bodyB = contact.bodyB.node!
+            
+            print("Contact Normal: \(contact.contactNormal)")
+            
+            if bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+                bodyB.name == GameFrame.FRAME_NAME {
+                print("didBegin contact [Block & Frame]")
                 stopActiveTetromino()
+                lastBlockStopTime = _currentTime
+            }
+            
+            if bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+                bodyA.name == GameFrame.FRAME_NAME {
+                print("didBegin contact [Block & Frame]")
+                stopActiveTetromino()
+                lastBlockStopTime = _currentTime
+            }
+            
+            if (bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+                bodyB.name == Tetromino.STOPPED_TETROMINO_NAME) ||
+               (bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
+                bodyA.name == Tetromino.STOPPED_TETROMINO_NAME) {
+                print("didBegin contact [Block & Block]")
+                if contact.contactNormal.dy > minimumVerticalNormalContact {
+                    stopActiveTetromino()
+                    lastBlockStopTime = _currentTime
+                }
             }
         }
     }

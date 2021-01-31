@@ -207,7 +207,7 @@ class Tetromino {
         parentNode.physicsBody = physicsBody
         parentNode.physicsBody?.isDynamic = true
         parentNode.physicsBody?.allowsRotation = false
-//        parentNode.physicsBody?.usesPreciseCollisionDetection = true
+        parentNode.physicsBody?.usesPreciseCollisionDetection = true
         parentNode.physicsBody?.categoryBitMask = Tetromino.CATEGORY_BM
         parentNode.physicsBody?.collisionBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
         parentNode.physicsBody?.contactTestBitMask = Tetromino.CATEGORY_BM | GameFrame.CATEGORY_BM
@@ -291,6 +291,14 @@ class Tetromino {
     
     func removeFromScene() {
         parentNode.removeFromParent()
+    }
+    
+    func moveRight() {
+        parentNode.position.x += blockSize.width
+    }
+    
+    func moveLeft() {
+        parentNode.position.x -= blockSize.width
     }
     
     func setStepdownAction(stepInterval: TimeInterval) {
