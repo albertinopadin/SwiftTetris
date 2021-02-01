@@ -33,7 +33,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var activeTetromino: Tetromino?
     let defaultStepInterval: TimeInterval = 0.1
     let viewSize: CGSize
-    let debounceTime: TimeInterval = 0.1
+    let debounceTime: TimeInterval = 0.2
     var lastBlockStopTime: TimeInterval = 0.0
     var _currentTime: TimeInterval = 0.0
     
@@ -114,8 +114,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let leftSwipeRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
         leftSwipeRecognizer.direction = .left
         
+        let downSwipeRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
+        downSwipeRecognizer.direction = .down
+        
         view.addGestureRecognizer(rightSwipeRecognizer)
         view.addGestureRecognizer(leftSwipeRecognizer)
+        view.addGestureRecognizer(downSwipeRecognizer)
         
         // Start game:
         insertRandomTetrominoAtTop()
@@ -146,6 +150,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if direction == .left {
             activeTetromino?.moveLeft()
+        }
+        
+        if direction == .down {
+            // Drop active tetromino:
         }
     }
     
@@ -230,7 +238,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func getRowAndColumnFromPosition(position: CGPoint) -> (Int, Int) {
-        print("Block position: \(position)")
+//        print("Block position: \(position)")
         let halfHeight = viewSize.height/2
         let halfWidth = viewSize.width/2
         let blockWidthFloat = CGFloat(blockSize.width)
@@ -251,8 +259,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                                         Tetromino.PHYSICS_BODY_SIZE_RATIO,
                                  height: visibleBlockSize.height *
                                         Tetromino.PHYSICS_BODY_SIZE_RATIO)
-        
-        let physicsBody = SKPhysicsBody(rectangleOf: reducedSize, center: block.position)
+        let physicsBody = SKPhysicsBody(rectangleOf: reducedSize)
         physicsBody.isDynamic = false
         physicsBody.allowsRotation = false
         physicsBody.usesPreciseCollisionDetection = true
@@ -263,17 +270,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func transferBlockToSelf(block: SKShapeNode) {
+        print("transferBlockToSelf")
         let blockParentPosition = block.parent!.position
         let blockParentRotation = block.parent!.zRotation
         let blockPosition = getBlockPositionInSceneCoordinates(block, parentPosition: blockParentPosition)
         block.removeFromParent()
+        addChild(block)
         block.position = blockPosition
         block.rotateRelativeTo(origin: blockParentPosition, byRadians: blockParentRotation)
-        addChild(block)
         block.physicsBody = constructPhysicsBody(block: block)
+        block.name = Tetromino.STOPPED_TETROMINO_NAME
+        print("transferBlockToSelf ENDED")
     }
     
     func insertStoppedTetrominoBlocksIntoSelf() {
+        print("insertStoppedTetrominoBlocksIntoSelf")
         // Get position of each block
         // Based on position insert in internal array of arrays:
         activeTetromino!.blocks.forEach { block in
@@ -283,6 +294,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         activeTetromino!.removeFromScene()
+        print("insertStoppedTetrominoBlocksIntoSelf ENDED")
     }
     
     func calculateRows() {
@@ -317,12 +329,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func stopActiveTetromino() {
+        print("Stopping active tetromino...")
         activeTetromino?.stop()
-//        insertStoppedTetrominoBlocksIntoSelf()  // <- BUG HERE!
+        insertStoppedTetrominoBlocksIntoSelf()
 //        calculateRows()
 //        removeFullRows()
         // methodToRunToAnimateNonFullRowBlocksFalling()
         // recalculateRows() ???
+        print("Inserting random tetromino...")
         insertRandomTetrominoAtTop()
     }
     
@@ -335,14 +349,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             if bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
                 bodyB.name == GameFrame.FRAME_NAME {
-                print("didBegin contact [Block & Frame]")
+//                print("didBegin contact [Block & Frame]")
                 stopActiveTetromino()
                 lastBlockStopTime = _currentTime
             }
             
             if bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
                 bodyA.name == GameFrame.FRAME_NAME {
-                print("didBegin contact [Block & Frame]")
+//                print("didBegin contact [Block & Frame]")
                 stopActiveTetromino()
                 lastBlockStopTime = _currentTime
             }
@@ -351,8 +365,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 bodyB.name == Tetromino.STOPPED_TETROMINO_NAME) ||
                (bodyB.name == Tetromino.ACTIVE_TETROMINO_NAME &&
                 bodyA.name == Tetromino.STOPPED_TETROMINO_NAME) {
-                print("didBegin contact [Block & Block]")
-                if contact.contactNormal.dy > minimumVerticalNormalContact {
+//                print("didBegin contact [Block & Block]")
+                if abs(contact.contactNormal.dy) > minimumVerticalNormalContact {
                     stopActiveTetromino()
                     lastBlockStopTime = _currentTime
                 }
