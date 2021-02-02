@@ -238,13 +238,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func getRowAndColumnFromPosition(position: CGPoint) -> (Int, Int) {
-//        print("Block position: \(position)")
+        print("Block position: \(position)")
         let halfHeight = viewSize.height/2
         let halfWidth = viewSize.width/2
         let blockWidthFloat = CGFloat(blockSize.width)
         let blockHeightFloat = CGFloat(blockSize.height)
-        let row = Int(position.y / blockHeightFloat) + Int(halfHeight / blockHeightFloat)
-        let column = Int(position.x / blockWidthFloat) + Int(halfWidth / blockWidthFloat)
+        let row = Int(position.y / blockHeightFloat + halfHeight / blockHeightFloat)
+        let column = Int(position.x / blockWidthFloat + halfWidth / blockWidthFloat)
         return (row, column)
     }
     
@@ -288,23 +288,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Get position of each block
         // Based on position insert in internal array of arrays:
         activeTetromino!.blocks.forEach { block in
-            let (row, column) = getRowAndColumnFromPosition(position: block.position)
-            insertIntoStoppedBlockArray(block: block, row: row, column: column)
             transferBlockToSelf(block: block)
+            let (row, column) = getRowAndColumnFromPosition(position: block.position)
+            print("Inserting at row: \(row), column: \(column)")
+            insertIntoStoppedBlockArray(block: block, row: row, column: column)
         }
         
         activeTetromino!.removeFromScene()
         print("insertStoppedTetrominoBlocksIntoSelf ENDED")
     }
     
-    func calculateRows() {
-        for (idx, row) in stoppedNodesRows.enumerated() {
+    func calculateRows() -> [Int] {
+        var iRowCounts = [Int].init(repeating: 0, count: rows)
+        for (row_idx, row) in stoppedNodesRows.enumerated() {
             row.forEach { column in
                 if let _ = column {
-                    rowCounts[idx] += 1
+                    iRowCounts[row_idx] += 1
                 }
             }
         }
+        return iRowCounts
     }
     
     func removeStoppedNodeRow(rowIdx: Int) {
@@ -332,8 +335,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         print("Stopping active tetromino...")
         activeTetromino?.stop()
         insertStoppedTetrominoBlocksIntoSelf()
-//        calculateRows()
-//        removeFullRows()
+        rowCounts = calculateRows()  // <- BUG EITHER HERE
+        print("Row Counts: \(rowCounts)")
+//        removeFullRows()  // <- OR HERE
         // methodToRunToAnimateNonFullRowBlocksFalling()
         // recalculateRows() ???
         print("Inserting random tetromino...")
