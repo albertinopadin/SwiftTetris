@@ -335,7 +335,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         print("Stopping active tetromino...")
         activeTetromino?.stop()
         insertStoppedTetrominoBlocksIntoSelf()
-        rowCounts = calculateRows()  // <- BUG EITHER HERE
+        rowCounts = calculateRows()
         print("Row Counts: \(rowCounts)")
 //        removeFullRows()  // <- OR HERE
         // methodToRunToAnimateNonFullRowBlocksFalling()
