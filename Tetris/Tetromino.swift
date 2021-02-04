@@ -17,7 +17,7 @@ class Tetromino {
     static let DEFAULT_BLOCK_SIZE = CGSize(width: 30.0, height: 30.0)
     static let DEFAULT_BLOCK_CORNER_RADIUS: CGFloat = 7.0
     
-    static let PHYSICS_BODY_SIZE_RATIO: CGFloat = 0.95
+    static let PHYSICS_BODY_SIZE_RATIO: CGFloat = 0.90
     
     static let RADS_45_DEG = Tetromino.convertToRadians(degrees: 45.0)
     static let RADS_90_DEG = Tetromino.convertToRadians(degrees: 90.0)

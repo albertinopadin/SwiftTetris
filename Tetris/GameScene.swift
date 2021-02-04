@@ -31,7 +31,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let topMidpoint: CGPoint
     let screenMidpointX: CGFloat
     var activeTetromino: Tetromino?
-    let defaultStepInterval: TimeInterval = 0.1
+    let defaultStepInterval: TimeInterval = 0.3
     let viewSize: CGSize
     let debounceTime: TimeInterval = 0.2
     var lastBlockStopTime: TimeInterval = 0.0
@@ -337,7 +337,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         insertStoppedTetrominoBlocksIntoSelf()
         rowCounts = calculateRows()
         print("Row Counts: \(rowCounts)")
-//        removeFullRows()  // <- OR HERE
+        removeFullRows()
         // methodToRunToAnimateNonFullRowBlocksFalling()
         // recalculateRows() ???
         print("Inserting random tetromino...")
