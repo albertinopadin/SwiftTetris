@@ -294,10 +294,12 @@ class Tetromino {
     }
     
     func moveRight() {
+        // Add animation for this:
         parentNode.position.x += blockSize.width
     }
     
     func moveLeft() {
+        // Add animation for this:
         parentNode.position.x -= blockSize.width
     }
     
@@ -309,8 +311,6 @@ class Tetromino {
     }
     
     func stepDown() {
-        // Add animation for this:
-//        parentNode.position.y += defBlockSize.height
         parentNode.run(Tetromino.STEP_DOWN_ACTION)
     }
     
@@ -328,6 +328,12 @@ class Tetromino {
         applyConstraints(rIndex: rotationIndex)
         parentNode.run(Tetromino.ROTATE_CCW_ACTION, withKey: Tetromino.KEY_ROTATE_CCW_ACTION)
 //        checkNodeAngle()
+    }
+    
+    func drop() {
+        parentNode.removeAllActions()
+        parentNode.physicsBody?.velocity = CGVector(dx: 0.0, dy: -1000.0)
+        // applyImpulse vs applyForce ???
     }
     
     func checkNodeAngle() {

@@ -153,7 +153,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if direction == .down {
-            // Drop active tetromino:
+            activeTetromino?.drop()
         }
     }
     
