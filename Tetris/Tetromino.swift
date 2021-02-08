@@ -366,8 +366,9 @@ class Tetromino {
     }
     
     func stop() {
-        parentNode.name = Tetromino.STOPPED_TETROMINO_NAME
+        parentNode.physicsBody?.velocity = CGVector.zero
         parentNode.removeAllActions()
         parentNode.physicsBody?.isDynamic = false
+        parentNode.name = Tetromino.STOPPED_TETROMINO_NAME
     }
 }

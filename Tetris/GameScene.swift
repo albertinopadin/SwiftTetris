@@ -331,9 +331,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    func getCenterPointOfRowAndColumn(row: Int, column: Int) -> CGPoint {
+        let x = CGFloat(column) * blockSize.width - viewSize.width/2 + blockSize.width/2
+        let y = CGFloat(row) * blockSize.height - viewSize.height/2 + blockSize.height/2
+        return CGPoint(x: x, y: y)
+    }
+    
+    func getNearestLegalPositionTo(position: CGPoint) -> CGPoint {
+        let (row, column) = getRowAndColumnFromPosition(position: position)
+        return getCenterPointOfRowAndColumn(row: row, column: column)
+    }
+    
+    func snapToNearestPosition(tetromino: Tetromino) {
+        let nearestLegalPos = getNearestLegalPositionTo(position: tetromino.position)
+        tetromino.position = nearestLegalPos
+    }
+    
     func stopActiveTetromino() {
         print("Stopping active tetromino...")
         activeTetromino?.stop()
+        // To position accurately:
+        snapToNearestPosition(tetromino: activeTetromino!)
         insertStoppedTetrominoBlocksIntoSelf()
         rowCounts = calculateRows()
         print("Row Counts: \(rowCounts)")
