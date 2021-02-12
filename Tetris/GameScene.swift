@@ -36,6 +36,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let debounceTime: TimeInterval = 0.2
     var lastBlockStopTime: TimeInterval = 0.0
     var _currentTime: TimeInterval = 0.0
+    let dropAction: SKAction
     
     static func calculateBlockSize(viewFrameWidth: CGFloat, numberOfColumns: Int) -> CGSize {
         let blockWidth = viewFrameWidth / CGFloat(numberOfColumns)
@@ -65,6 +66,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                                                  numberOfColumns: columns)
         columnsInfo = GameScene.calculateColumnsInfo(viewFrameWidth: size.width,                                                                          numberOfColumns: columns,
                                                      columnWidth: blockSize.width)
+        
+        dropAction = SKAction.moveBy(x: 0.0,
+                                     y: -blockSize.height,
+                                     duration: 0.1)
         
         screenMidpointX = 0
         topMidpoint = CGPoint(x: screenMidpointX, y: size.height/2)
@@ -323,12 +328,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         stoppedNodesRows[rowIdx] = [SKShapeNode?].init(repeating: nil, count: columns)
     }
     
-    func removeFullRows() {
+    // TODO: Perhaps we should also drop non-full rows here...
+    func removeFullRows() -> [Int] {
+        var fullRows = [Int]()
         for (idx, rowCount) in rowCounts.enumerated() {
             if rowCount >= columns {
+                fullRows.append(idx)
                 removeStoppedNodeRow(rowIdx: idx)
             }
         }
+        return fullRows
     }
     
     func getCenterPointOfRowAndColumn(row: Int, column: Int) -> CGPoint {
@@ -343,8 +352,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func snapToNearestPosition(tetromino: Tetromino) {
+//        let adjustedPosition = CGPoint(x: tetromino.position.x,
+//                                       y: tetromino.position.y - blockSize.height/2)
         let nearestLegalPos = getNearestLegalPositionTo(position: tetromino.position)
+        print("Nearest legal position: \(nearestLegalPos)")
         tetromino.position = nearestLegalPos
+    }
+    
+    func dropNode(_ node: SKShapeNode) {
+        print("In dropNode")
+//        node.position.y -= blockSize.height
+        node.run(dropAction)
+    }
+    
+    func dropRow(at: Int) {
+        print("Dropping row at index: \(at)")
+        let row = stoppedNodesRows[at]
+        row.forEach { n in
+            if let node = n {
+                dropNode(node)
+            }
+        }
+    }
+    
+    func dropNonFullRows(fullRows: [Int]) {
+        print("Dropping non-full rows; full rows: \(fullRows)")
+        fullRows.forEach { fullRow in
+            for i in fullRow + 1..<stoppedNodesRows.count {
+                dropRow(at: i)
+            }
+        }
     }
     
     func stopActiveTetromino() {
@@ -355,8 +392,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         insertStoppedTetrominoBlocksIntoSelf()
         rowCounts = calculateRows()
         print("Row Counts: \(rowCounts)")
-        removeFullRows()
-        // methodToRunToAnimateNonFullRowBlocksFalling()
+        let fullRows = removeFullRows()
+        dropNonFullRows(fullRows: fullRows)
         // recalculateRows() ???
         print("Inserting random tetromino...")
         insertRandomTetrominoAtTop()
@@ -367,6 +404,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let bodyA = contact.bodyA.node!
             let bodyB = contact.bodyB.node!
             
+            print("Contact Point: \(contact.contactPoint)")
             print("Contact Normal: \(contact.contactNormal)")
             
             if bodyA.name == Tetromino.ACTIVE_TETROMINO_NAME &&
