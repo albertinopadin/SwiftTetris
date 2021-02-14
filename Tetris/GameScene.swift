@@ -360,26 +360,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func dropNode(_ node: SKShapeNode) {
-        print("In dropNode")
-//        node.position.y -= blockSize.height
         node.run(dropAction)
     }
     
     func dropRow(at: Int) {
-        print("Dropping row at index: \(at)")
+//        print("Dropping row at index: \(at)")
         let row = stoppedNodesRows[at]
         row.forEach { n in
             if let node = n {
                 dropNode(node)
             }
         }
+        stoppedNodesRows[at - 1] = row
+        stoppedNodesRows[at].removeAll()
+        stoppedNodesRows[at] = [SKShapeNode?].init(repeating: nil, count: columns)
     }
     
+    // TODO: Figure out how to do this better
+    //       When multiple rows are full, the drop leaves one extra row empty at bottom (why?)
+    //       May want to try dropping all at once when full rows are adjacent...
     func dropNonFullRows(fullRows: [Int]) {
         print("Dropping non-full rows; full rows: \(fullRows)")
         fullRows.forEach { fullRow in
             for i in fullRow + 1..<stoppedNodesRows.count {
                 dropRow(at: i)
+                
             }
         }
     }
@@ -391,10 +396,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         snapToNearestPosition(tetromino: activeTetromino!)
         insertStoppedTetrominoBlocksIntoSelf()
         rowCounts = calculateRows()
-        print("Row Counts: \(rowCounts)")
+        print("Row Counts BEFORE removal of full rows: \(rowCounts)")
         let fullRows = removeFullRows()
         dropNonFullRows(fullRows: fullRows)
-        // recalculateRows() ???
+        // Testing:
+        rowCounts = calculateRows()
+        print("Row Counts AFTER removal of full rows: \(rowCounts)")
         print("Inserting random tetromino...")
         insertRandomTetrominoAtTop()
     }
