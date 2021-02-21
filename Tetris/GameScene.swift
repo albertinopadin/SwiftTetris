@@ -31,7 +31,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let topMidpoint: CGPoint
     let screenMidpointX: CGFloat
     var activeTetromino: Tetromino?
-    let defaultStepInterval: TimeInterval = 0.3
+    let defaultStepInterval: TimeInterval = 0.2
     let viewSize: CGSize
     let debounceTime: TimeInterval = 0.2
     var lastBlockStopTime: TimeInterval = 0.0
@@ -377,15 +377,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     // TODO: Figure out how to do this better
-    //       When multiple rows are full, the drop leaves one extra row empty at bottom (why?)
     //       May want to try dropping all at once when full rows are adjacent...
     func dropNonFullRows(fullRows: [Int]) {
         print("Dropping non-full rows; full rows: \(fullRows)")
+        var alreadyDropped = 0
         fullRows.forEach { fullRow in
-            for i in fullRow + 1..<stoppedNodesRows.count {
+            for i in (fullRow - alreadyDropped) + 1..<stoppedNodesRows.count {
                 dropRow(at: i)
-                
             }
+            
+            alreadyDropped += 1
         }
     }
     
